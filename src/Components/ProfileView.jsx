@@ -60,10 +60,31 @@ export default function ProfileView() {
     };
 
     const handleLogout = async () => {
-        setUser(null)
-        localStorage.removeItem('token')
-        localStorage.removeItem('userId')
-        window.location.reload();
+        try {
+            setUser(null);
+            const response = await fetch('http://localhost:3000/api/logout', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                    'Content-Type': 'application/json'
+                },
+            });
+
+            if (!response.ok) {
+                throw new Error('Logout failed');
+            }
+            
+            localStorage.removeItem('token');
+            localStorage.removeItem('userId');
+            window.location.reload();
+        } catch (error) {
+            console.error('Error during logout:', error);
+            // You might want to show an error message to the user here
+            // For now, still clear local storage and reload as fallback
+            // localStorage.removeItem('token');
+            // localStorage.removeItem('userId');
+            // window.location.reload();
+        }
     }
     
 

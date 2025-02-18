@@ -6,6 +6,22 @@ import MessageArea from './MessageArea';
 export default function HomeView() {
     const [selectedChat, setSelectedChat] = useState(null);
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+    const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+
+    useEffect(() => {
+        const handleResize = () => {
+            const mobile = window.innerWidth < 768;
+            setIsMobile(mobile);
+            if (!mobile) {
+                setIsSidebarOpen(true);
+            }
+        };
+
+        window.addEventListener('resize', handleResize);
+        handleResize();
+
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
     const [user, setUser] = useState(null);
     const [timestamp, setTimestamp] = useState(Date.now());
     const [conversations, setConversations] = useState([]);
@@ -16,7 +32,7 @@ export default function HomeView() {
             setSelectedChat(location.state.selectedChat);
         }
     }, [location]);
-    
+
     useEffect(() => {
         const initializeData = async () => {
             try {
@@ -28,12 +44,12 @@ export default function HomeView() {
                 });
                 const responseData = await response.json();
                 const conversationData = responseData.data;
-                
+
                 //send the data to a function to get all participants
                 getParticipants(conversationData);
 
                 // setConversations(conversationData);
-                
+
                 const user = await authService.getUserInfo();
                 setUser(user.data);
             } catch (error) {
@@ -54,6 +70,7 @@ export default function HomeView() {
                     }
                 });
                 const data = await response.json();
+
                 return {
                     ...conversation,
                     participants: data.data
@@ -63,7 +80,7 @@ export default function HomeView() {
             // Wait for all participant requests to complete
             const conversationsWithParticipants = await Promise.all(participantPromises);
             setConversations(conversationsWithParticipants);
-            
+
         } catch (error) {
             console.error('Error fetching participants:', error);
         }
@@ -79,12 +96,8 @@ export default function HomeView() {
             currentUser: user
         });
     };
-    const handleLogout = () => {
-        setIsAuthenticated(false)
-        setUser(null)
-        localStorage.removeItem('token')
-        localStorage.removeItem('userId')
-    }
+
+
 
     return (
         <div className="min-h-screen bg-black text-gray-100 flex relative overflow-hidden">
@@ -99,10 +112,10 @@ export default function HomeView() {
                     <div className="p-4">
                         <div className="flex items-center justify-between">
                             <div className="flex items-center gap-3">
-                                <h1 className={`${isSidebarOpen ? 'opacity-100 w-auto' : 'opacity-0 w-0'} font-bold text-xl transition-all duration-300 overflow-hidden whitespace-nowrap`}>Chats</h1>
+                                <h1 className={`${(!isMobile || isSidebarOpen) ? 'opacity-100 w-auto' : 'opacity-0 w-0'} font-bold text-xl transition-all duration-300 overflow-hidden whitespace-nowrap`}>Chats</h1>
                                 <Link
                                     to="/search-contact"
-                                    className={`p-2 hover:bg-gray-800/80 rounded-lg transition-all duration-300 ${!isSidebarOpen && 'w-full flex justify-center'}`}
+                                    className={`p-2 hover:bg-gray-800/80 rounded-lg transition-all duration-300 ${(isMobile && !isSidebarOpen) && 'w-full flex justify-center'}`}
                                     title="Search Users"
                                 >
                                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -110,18 +123,20 @@ export default function HomeView() {
                                     </svg>
                                 </Link>
                             </div>
-                            <button
-                                onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-                                className={`p-2 hover:bg-gray-800/80 rounded-lg transition-all duration-300 ${!isSidebarOpen && 'rotate-180'}`}
-                                aria-label={isSidebarOpen ? 'Close sidebar' : 'Open sidebar'}
-                            >
-                                <svg className="w-5 h-5" 
-                                     fill="none" 
-                                     stroke="currentColor" 
-                                     viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                                </svg>
-                            </button>
+                            {isMobile && (
+                                <button
+                                    onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+                                    className={`p-2 hover:bg-gray-800/80 rounded-lg transition-all duration-300 ${!isSidebarOpen && 'rotate-180'}`}
+                                    aria-label={isSidebarOpen ? 'Close sidebar' : 'Open sidebar'}
+                                >
+                                    <svg className="w-5 h-5"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                                    </svg>
+                                </button>
+                            )}
                         </div>
                     </div>
 
@@ -132,7 +147,7 @@ export default function HomeView() {
                                 const otherParticipant = conversation.participants?.find(
                                     participant => participant.id !== user?.id
                                 );
-                                
+
                                 return (
                                     <div
                                         key={conversation.id}
@@ -169,7 +184,7 @@ export default function HomeView() {
                                 {isSidebarOpen && (
                                     <div>
                                         <p className="text-gray-400 text-sm">No conversations yet</p>
-                                        <Link 
+                                        <Link
                                             to='/search-contact'
                                             className="mt-4 px-4 py-2 bg-gray-800 hover:bg-gray-700 rounded-lg transition-colors duration-200 text-sm inline-block"
                                         >
@@ -183,8 +198,8 @@ export default function HomeView() {
 
                     {/* Profile Section */}
                     <div className="p-4 border-t border-gray-800 bg-gray-900/60">
-                        <Link 
-                            to='/my-profile' 
+                        <Link
+                            to='/my-profile'
                             className={`flex items-center ${isSidebarOpen ? 'gap-3 p-3' : 'justify-center p-2'} hover:bg-gray-800/50 rounded-xl transition-all duration-300 group relative`}
                         >
                             <div className={`overflow-hidden rounded-full border-2 border-gray-700 group-hover:border-gray-600 transition-all duration-300 ${isSidebarOpen ? 'w-10 h-10' : 'w-12 h-12'}`}>
@@ -200,7 +215,7 @@ export default function HomeView() {
                                     <p className="text-xs text-gray-400 truncate group-hover:text-gray-300 transition-colors duration-200">{user?.email || 'Loading...'}</p>
                                     <div className="mt-1 flex items-center gap-1">
                                         <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                                        <span className="text-xs text-gray-400 group-hover:text-gray-300 transition-colors duration-200">Online</span>
+                                        <span className="text-xs text-gray-400 group-hover:text-gray-300 transition-colors duration-200">{user?.status || 'Loading...'}</span>
                                     </div>
                                 </div>
                             ) : (
@@ -229,7 +244,7 @@ export default function HomeView() {
                             </div>
                             <div className="ml-4">
                                 <p className="font-medium text-gray-100">{selectedChat.participant?.username}</p>
-                                <p className="text-xs text-gray-400">Online</p>
+                                <p className="text-xs text-gray-400">{selectedChat.participant?.status}</p>
                             </div>
                         </>
                     ) : (
