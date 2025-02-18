@@ -53,7 +53,7 @@ export default function SearchContactView() {
         setError(null);
         try {
             const myUserID = localStorage.getItem('userId');
-            const userListResponse = await fetch(`http://localhost:3000/api/search-user?searchQuery=${query}`, {
+            const userListResponse = await fetch(`http://localhost:3000/api/search-user?searchQuery=${query.toLowerCase()}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
