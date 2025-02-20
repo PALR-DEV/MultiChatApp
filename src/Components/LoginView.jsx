@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 
 export default function LandingView() {
   return (
@@ -17,7 +18,7 @@ export default function LandingView() {
 
       {/* Right Side: Form */}
       <div className="w-[40%] flex items-center justify-center p-8">
-        <form className="w-full max-w-md space-y-8 bg-white p-6 rounded-lg shadow-md">
+        <form className="w-full max-w-md space-y-8 bg-white p-6 ">
           {/* Header Section */}
           <div className="text-center">
             {/* Logo/Icon (customized to match your image) */}
@@ -115,9 +116,9 @@ export default function LandingView() {
 
           {/* Optional: Forgot Password Link */}
           <p className="text-sm text-gray-500 text-center">
-            <a href="#" className="text-black hover:text-gray-500 transition-colors duration-200">
+            <Link to='/signup' className="text-black hover:text-gray-500 transition-colors duration-200">
               Already have a account? Sign up
-            </a>
+            </Link>
           </p>
         </form>
       </div>

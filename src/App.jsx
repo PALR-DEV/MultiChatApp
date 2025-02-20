@@ -1,12 +1,21 @@
-import { useState, View } from 'react'
+import { useState } from 'react'; // View is not a valid React import, removing it
 import LoginView from './Components/LoginView.jsx';
-function App() {
+import SignUpView from './Components/SignUpView.jsx';
+import { HashRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 
+function App() {
   return (
-    <>
-      <LoginView />
-    </>
-  )
+    <Router>
+      <Routes>
+        {/* Redirect root to /login */}
+        <Route path="/" element={<Navigate to="/login" replace />} />
+        <Route path="/login" element={<LoginView />} />
+        <Route path="/signup" element={<SignUpView />} />
+        {/* Catch-all redirects to /login */}
+        <Route path="*" element={<Navigate to="/login" replace />} />
+      </Routes>
+    </Router>
+  );
 }
 
-export default App
+export default App;
