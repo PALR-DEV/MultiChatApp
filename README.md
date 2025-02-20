@@ -72,7 +72,7 @@ Contributions are welcome! Feel free to open issues and submit pull requests.
 
 Your Name - [@PALR-DEV](https://twitter.com/Senpai__DEV)
 
-Project Link: [https://github.com/PALR_DEV/multichat](https://github.com/PALR-DEV/multichat)
+Project Link: [https://github.com/PALR_DEV/MultiChatApp](https://github.com/PALR-DEV/MultiChatApp)
 
 ---
 
