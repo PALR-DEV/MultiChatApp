@@ -1,5 +1,8 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import { supabase } from '../config/supabase';
 
 export default function SignUpView() {
   const [formData, setFormData] = useState({
@@ -20,19 +23,98 @@ export default function SignUpView() {
     }));
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    console.log('Form submitted:', formData);
-    // Add your form submission logic here
+  const validateAge = (dateOfBirth) => {
+    const today = new Date();
+    const birthDate = new Date(dateOfBirth);
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const monthDiff = today.getMonth() - birthDate.getMonth();
+    
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+      age--;
+    }
+    
+    return age >= 18;
   };
 
-  const handleGoogleSignUp = () => {
-    console.log('Sign up with Google clicked');
-    // Add Google OAuth logic here
+  const validateFields = () => {
+    const errors = [];
+    if (formData.userName.trim() === '') errors.push('Username is required');
+    if (formData.email.trim() === '') errors.push('Email is required');
+    return { isValid: errors.length === 0, errors };
   };
+
+  const checkExistingCredentials = async (userName, email) => {
+    try {
+      const { data: existingUsers, error } = await supabase
+        .from('Users')
+        .select('userName, email')
+        .or(`userName.eq.${userName},email.eq.${email}`);
+  
+      if (error) throw new Error(error.message);
+  
+      const errors = [];
+      if (existingUsers?.some(user => user.userName === userName) && existingUsers?.some(user => user.email === email)) {
+        errors.push('Username and email already exist');
+      } else {
+        if (existingUsers?.some(user => user.userName === userName)) {
+          errors.push('Username already exists');
+        }
+        if (existingUsers?.some(user => user.email === email)) {
+          errors.push('Email already exists');
+        }
+      }
+  
+      return { isValid: errors.length === 0, errors };
+    } catch (error) {
+      console.error('Error checking credentials:', error);
+      throw new Error('An error occurred while checking credentials');
+    }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    
+    try {
+      // Check age
+      if (!validateAge(formData.dateOfBirth)) {
+        toast.error('You must be at least 18 years old to register');
+        return;
+      }
+  
+      // Check required fields
+      const fieldsValidation = validateFields();
+      if (!fieldsValidation.isValid) {
+        const errors = fieldsValidation.errors;
+        const errorMessage = errors.length > 1 
+          ? `${errors.slice(0, -1).join(', ')} and ${errors[errors.length - 1]}`
+          : errors[0];
+        toast.error(errorMessage);
+        return;
+      }
+  
+      // Check existing credentials
+      const existingCheck = await checkExistingCredentials(formData.userName, formData.email);
+      if (!existingCheck.isValid) {
+        const errors = existingCheck.errors;
+        const errorMessage = errors.length > 1 
+          ? `${errors.slice(0, -1).join(', ')} and ${errors[errors.length - 1]}`
+          : errors[0];
+        toast.error(errorMessage);
+        return;
+      }
+  
+      // Proceed with form submission
+      console.log('Form is valid:', formData);
+    } catch (error) {
+      toast.error(error.message);
+    }
+  };
+
+  
 
   return (
     <div className="flex w-full h-screen">
+      <ToastContainer />
       {/* Hero Section (Left Side) - Darker Image with Black Overlay - Kept the Same */}
       <div className="w-[40%] relative">
         <img
@@ -71,11 +153,12 @@ export default function SignUpView() {
               <input
                 type="text"
                 name="firstName"
+                required
                 value={formData.firstName}
                 onChange={handleChange}
                 placeholder="First name"
                 className="w-full p-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black bg-white text-black placeholder-gray-500"
-                required
+
               />
               <input
                 type="text"

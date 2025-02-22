@@ -30,6 +30,43 @@ class AuthService {
       
     }
   }
+  
+  async signUpUser(email, password) {
+    try {
+      const {erorr} = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      })
+    } catch (error) {
+      throw error; // Re-throw for the caller to handle
+    }
+  }
+
+  async registerUser(payload){
+    try {
+
+      const { firstName, lastName, userName, dob, email  } = payload;
+      const {data, error} = await supabase.from('Users').insert[{
+        firstName,
+        lastName,
+        userName,
+        dob,
+        email,
+      }]
+
+      if(error) {
+        throw new Error(error.message);
+      } else {
+        return data;
+      }
+      
+    } catch (error) {
+      throw error;
+      
+    }
+  }
+
+  
 
 
   async signInWithTwitter() {
