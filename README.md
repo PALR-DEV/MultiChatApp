@@ -17,6 +17,38 @@ A modern, real-time chat application built with React and powered by Supabase, f
 - ⚡ Lightning Fast Development with Vite
 - 🔄 Real-time Updates
 
+## 🚀 Future Features
+
+- 📱 Enhanced Chat Experience
+  - Message Reactions and Emojis
+  - File Sharing and Media Support
+  - Voice Messages
+  - Video Calls
+- 🔔 Advanced Notifications
+  - Push Notifications
+  - Custom Sound Alerts
+  - Mention Notifications
+- 👥 Group Chat Enhancements
+  - Group Video Calls
+  - Shared Calendar
+  - Task Management
+- 🔍 Advanced Search
+  - Message Search
+  - File Search
+  - User Search
+- 🌐 Cross-Platform Support
+  - Mobile Apps (iOS/Android)
+  - Desktop Apps
+  - Web Browser Extension
+- 🔒 Enhanced Security
+  - Two-Factor Authentication
+  - End-to-End Encryption
+  - Secure File Transfer
+- 🎨 Customization
+  - Custom Themes
+  - Message Formatting
+  - Custom Emojis
+
 ## 🖼️ Preview
 
 ![Login Interface](https://cdn.dribbble.com/userupload/8432950/file/original-0c14504bd291054d76548cb015dff89a.png?resize=800x600&vertical=center)

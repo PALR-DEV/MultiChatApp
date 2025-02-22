@@ -5,6 +5,8 @@ export default function SignUpView() {
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
+    userName:'',
+    dateOfBirth: '',
     email: '',
     password: '',
     agreeTerms: false
@@ -35,14 +37,15 @@ export default function SignUpView() {
       <div className="w-[40%] relative">
         <img
           src="https://cdn.dribbble.com/userupload/8432950/file/original-0c14504bd291054d76548cb015dff89a.png?resize=2048x1536&vertical=center"
-          alt="Hero Image"
-          className="w-full h-full object-cover absolute inset-0 opacity-90" // Darker image with lower opacity
+          alt="Security Illustration"
+          className="w-full h-full object-cover absolute inset-0 opacity-90"
         />
         <div className="absolute inset-0 bg-gradient-to-r from-black/80 to-transparent"></div>
         <div className="absolute inset-0 flex items-center justify-center text-white">
           <div className="text-center p-8">
-            <h1 className="text-4xl font-bold mb-4 drop-shadow-lg">Join Our Community</h1>
-            <p className="text-lg drop-shadow-md">Create your account and unlock amazing features today!</p>
+            <h1 className="text-4xl font-bold mb-4 drop-shadow-lg">End-to-End Encrypted</h1>
+            <p className="text-lg drop-shadow-md mb-2">Your messages are secured with state-of-the-art encryption</p>
+            <p className="text-sm drop-shadow-md text-gray-200">Private key security ensures only you can access your data</p>
           </div>
         </div>
       </div>
@@ -84,6 +87,26 @@ export default function SignUpView() {
                 required
               />
             </div>
+
+            <input
+              type="text"
+              name="userName"
+              value={formData.userName}
+              onChange={handleChange}
+              placeholder="Username"
+              className="w-full p-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black bg-white text-black placeholder-gray-500"
+              required
+            />
+
+            <input
+              type="date"
+              name="dateOfBirth"
+              value={formData.dateOfBirth}
+              onChange={handleChange}
+              className="w-full p-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black bg-white text-black placeholder-gray-500"
+              required
+              max={new Date().toISOString().split('T')[0]}
+            />
 
             <input
               type="email"
@@ -128,25 +151,35 @@ export default function SignUpView() {
             </div>
 
             {/* Sign Up Buttons */}
-            <div className="space-y-3">
+            <div className="space-y-2">
               <button
                 type="submit"
                 className="w-full bg-black text-white p-4 rounded-lg hover:bg-gray-800 transition-colors font-semibold"
               >
                 Sign Up
               </button>
-              <button
-                type="button"
-                onClick={handleGoogleSignUp}
-                className="w-full bg-white border border-gray-300 text-gray-700 p-4 rounded-lg hover:bg-gray-100 flex items-center justify-center gap-3 font-semibold shadow-md"
-              >
-                <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.78h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" />
-                  <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.78c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
-                  <path d="M5.84 14.09c-.22-.66-.34-1.36-.34-2.09s.12-1.43.34-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" />
-                </svg>
-                Sign Up with Google
-              </button>
+
+              {/* <div className="relative py-2">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-gray-300"></div>
+                </div>
+                <div className="relative flex justify-center">
+                  <span className="bg-white px-4 text-sm text-gray-500">or continue with</span>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 gap-4">
+                <button
+                  type="button"
+                  onClick={() => console.log('Sign up with X clicked')}
+                  className="flex items-center justify-center gap-2 px-4 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                >
+                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                  </svg>
+                  <span className="text-sm font-medium">X (Twitter)</span>
+                </button>
+              </div> */}
             </div>
           </div>
         </form>
