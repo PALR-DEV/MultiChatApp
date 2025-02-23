@@ -4,6 +4,7 @@ import SignUpView from './Components/SignUpView.jsx';
 import HomeView from './Components/HomeView.jsx';
 import { HashRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { supabase } from './config/supabase.jsx';
+import ProfileView from './Components/ProfileView.jsx';
 
 function App() {
   const [session, setSession] = useState(null);
@@ -25,7 +26,11 @@ function App() {
   }, []);
 
   if (loading) {
-    return <div>Loading...</div>;
+    return (
+      <div className="fixed inset-0 flex items-center justify-center bg-black/50 backdrop-blur-md z-[9999]">
+        <div className="animate-spin rounded-full h-24 w-24 border-t-4 border-b-4 border-white bg-transparent shadow-2xl"></div>
+      </div>
+    );
   }
 
   return (
@@ -42,6 +47,7 @@ function App() {
           /* If user is logged in, they can only access home */
           <>
             <Route path="/home" element={<HomeView />} />
+            <Route path='/profile' element={<ProfileView />} />
             <Route path="/" element={<Navigate to="/home" replace />} />
             <Route path="*" element={<Navigate to="/home" replace />} />
           </>

@@ -66,7 +66,21 @@ class AuthService {
     }
   }
 
-  
+  async getUser() {
+    try {
+      
+      const {data, error} = await supabase.from('Users').select('*').eq('id', (await supabase.auth.getUser()).data.user.id).single();
+      if(error) {
+        throw new Error(error.message);
+      } else {
+        return data;
+      }
+    } catch (error) {
+      throw error;
+      
+    }
+  }
+
 
 
   async signInWithTwitter() {
