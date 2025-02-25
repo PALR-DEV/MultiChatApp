@@ -10,22 +10,26 @@ const ProfileView = () => {
     const avatarInputRef = useRef(null);
     const [bannerPreview, setBannerPreview] = useState(null);
     const [avatarPreview, setAvatarPreview] = useState(null);
-    const [user, setUser] = useState({
-        username: 'Senpai',
-        email: 'admin@gmail.com',
-        avatar_url: 'https://i.pinimg.com/custom_covers/222x/712694778471368007_1690054447.jpg',
-        banner_url: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQbq85TPI1fgrWt9TF4MGaMluwSSOI2vFdf7Q&s',
-        status: 'online',
-        bio: 'Hey there! I\'m using MultiChat',
-        stats: {
-            messages: 1234,
-            friends: 56,
-            joined: '02/2024'
-        },
-        lastActive: '2 hours ago',
-    });
+    const [user, setUser] = useState(null)
 
+    async function getUserInfo() {
+        try {
+            const user = await authService.getUser();
+            setUser(user);
 
+        } catch (error) {
+            throw error;
+            
+        }
+    }
+
+    useEffect(() => {
+        async function initFunctions() {
+            getUserInfo();
+        }
+
+        initFunctions();
+    }, [])
 
 
     const handleInputChange = (e) => {
@@ -55,15 +59,21 @@ const ProfileView = () => {
         }
     }
 
+    const updateBannerPic = async() => {
+        try {
+            const { data, error } = await supabase.storage.from('banner_pics').update(`${user.id}/banner.png`, bannerPreview, {
+                cacheControl: '3600',
+                upsert: true
+            })
+        } catch (error) {
+            throw error
+
+        }
+    }
+
     
 
-    useEffect(() => { 
-        const fetchUserInfo  = async() => {
-            const user = await authService.getUser();
-            
-        }
-        fetchUserInfo();
-    }, []);
+   
 
     const handleImageUpload = (event, type) => {
         const file = event.target.files[0];
@@ -91,17 +101,26 @@ const ProfileView = () => {
         <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-8">
             <div className="max-w-4xl mx-auto bg-white rounded-2xl shadow-xl relative overflow-hidden">
                 {/* Banner Image with Upload Overlay */}
-                <div className="h-48 w-full relative group">
-                    <img
-                        src={user.banner_url}
-                        alt="Profile Banner"
-                        className="w-full h-full object-cover"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/30"></div>
-                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 bg-black/50">
+                <div className="h-48 w-full relative group bg-gray-100 flex items-center justify-center">
+                    {user?.banner_url ? (
+                        <img
+                            src={user.banner_url}
+                            alt="Profile Banner"
+                            className="w-full h-full object-cover"
+                        />
+                    ) : (
+                        <div className="w-full h-full bg-gray-100 flex items-center justify-center">
+                            <svg className="w-12 h-12 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                        </div>
+                    )}
+
+                    <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/20"></div>
+                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 bg-black/40">
                         <button
                             onClick={() => bannerInputRef.current.click()}
-                            className="bg-white text-gray-700 px-4 py-2 rounded-full text-sm font-medium hover:bg-gray-50 transition-all duration-300 flex items-center"
+                            className="bg-white text-gray-600 px-4 py-2 rounded-full text-sm font-medium hover:bg-gray-50 transition-all duration-300 flex items-center shadow-lg"
                         >
                             <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -142,14 +161,14 @@ const ProfileView = () => {
                 <div className="flex flex-col items-center mb-12">
                     <div className="relative group">
                         <img
-                            src={user.avatar_url}
+                            src={user?.avatar_url || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgdmlld0JveD0iMCAwIDEwMCAxMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjEwMCIgaGVpZ2h0PSIxMDAiIGZpbGw9IiNFNUU3RUIiLz48cGF0aCBkPSJNNTAgMzhjLTYuNjI3NCAwLTEyIDUuMzcyNi0xMiAxMnM1LjM3MjYgMTIgMTIgMTIgMTItNS4zNzI2IDEyLTEyLTUuMzcyNi0xMi0xMi0xMnptMCAyMGMtNC40MTgzIDAtOC0zLjU4MTctOC04czMuNTgxNy04IDgtOCA4IDMuNTgxNyA4IDgtMy41ODE3IDgtOCA4eiIgZmlsbD0iIzlDQTNBRiIvPjxwYXRoIGQ9Ik02NiA2OGMwLTguODM2Ni03LjE2MzQtMTYtMTYtMTZzLTE2IDcuMTYzNC0xNiAxNiIgc3Ryb2tlPSIjOUNBM0FGIiBzdHJva2Utd2lkdGg9IjQiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIvPjwvc3ZnPg=='}
                             alt="Profile"
-                            className="relative w-40 h-40 rounded-full object-cover border-2 border-gray-200 group-hover:scale-105 transition-all duration-300"
+                            className="relative w-40 h-40 rounded-full object-cover border-4 border-white shadow-lg group-hover:scale-105 transition-all duration-300 bg-gray-100"
                         />
-                        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 bg-black/50 rounded-full">
+                        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 bg-black/40 rounded-full">
                             <button
                                 onClick={() => avatarInputRef.current.click()}
-                                className="bg-white text-gray-700 px-4 py-2 rounded-full text-sm font-medium hover:bg-gray-50 transition-all duration-300 flex items-center"
+                                className="bg-white text-gray-600 px-4 py-2 rounded-full text-sm font-medium hover:bg-gray-50 transition-all duration-300 flex items-center shadow-lg"
                             >
                                 <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -165,25 +184,23 @@ const ProfileView = () => {
                             />
                         </div>
                     </div>
-                    <h1 className="mt-6 text-3xl font-bold text-gray-800 tracking-tight">{user.username}</h1>
-                    <span className="inline-flex items-center px-4 py-1.5 rounded-full text-sm font-medium bg-green-50 text-green-800 mt-3">
-                        <span className="w-2 h-2 rounded-full bg-green-500 mr-2 animate-pulse"></span>
-                        {user.status}
-                    </span>
+                    <h1 className="mt-6 text-3xl font-bold text-gray-800 tracking-tight">{user?.userName || 'Loading...'}</h1>
+                    {/* <span className="inline-flex items-center px-4 py-1.5 rounded-full text-sm font-medium bg-green-50 text-green-800 mt-3">
+                        <span className="w-2 h-2 rounded-full bg-green-500 mr-2 animate-pulse"></span>Online</span> */}
                 </div>
 
                 {/* Account Statistics */}
                 <div className="flex justify-center gap-6 mb-8">
                     <div className="flex-1 max-w-[150px] text-center group">
-                        <div className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-blue-400 bg-clip-text text-transparent group-hover:from-blue-500 group-hover:to-blue-300 transition-all duration-300">{user.stats.messages}</div>
+                        <div className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-blue-400 bg-clip-text text-transparent group-hover:from-blue-500 group-hover:to-blue-300 transition-all duration-300">0</div>
                         <div className="text-sm font-medium text-gray-500 mt-1 group-hover:text-gray-700">Messages</div>
                     </div>
                     <div className="flex-1 max-w-[150px] text-center group">
-                        <div className="text-3xl font-bold bg-gradient-to-r from-green-600 to-green-400 bg-clip-text text-transparent group-hover:from-green-500 group-hover:to-green-300 transition-all duration-300">{user.stats.friends}</div>
+                        <div className="text-3xl font-bold bg-gradient-to-r from-green-600 to-green-400 bg-clip-text text-transparent group-hover:from-green-500 group-hover:to-green-300 transition-all duration-300">0</div>
                         <div className="text-sm font-medium text-gray-500 mt-1 group-hover:text-gray-700">Friends</div>
                     </div>
                     <div className="flex-1 max-w-[150px] text-center group">
-                        <div className="text-lg font-bold text-gray-800 group-hover:text-gray-900 transition-all duration-300">{user.stats.joined}</div>
+                        <div className="text-lg font-bold text-gray-800 group-hover:text-gray-900 transition-all duration-300">0</div>
                         <div className="text-sm font-medium text-gray-500 mt-1 group-hover:text-gray-700">Joined</div>
                     </div>
                 </div>
@@ -192,7 +209,7 @@ const ProfileView = () => {
                 <div className="text-center mb-8">
                     <div className="inline-flex items-center px-4 py-2 rounded-full bg-gray-100">
                         <span className="w-2 h-2 rounded-full bg-green-500 mr-2"></span>
-                        <span className="text-sm text-gray-600">Last active {user.lastActive}</span>
+                        <span className="text-sm text-gray-600">Last active {user?.lastActive || 'Online'}</span>
                     </div>
                 </div>
 
@@ -213,7 +230,7 @@ const ProfileView = () => {
                                 <input
                                     type="text"
                                     name="username"
-                                    value={user.username}
+                                    value={user?.userName || 'Loading...'}
                                     onChange={handleInputChange}
                                     className="mt-2 block w-full rounded-lg border border-gray-300 px-4 py-3 text-gray-700 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all duration-200 bg-white/50 hover:bg-white"
                                 />
@@ -223,15 +240,15 @@ const ProfileView = () => {
                                 <input
                                     type="email"
                                     name="email"
-                                    value={user.email}
-                                    onChange={handleInputChange}
-                                    className="mt-2 block w-full rounded-lg border border-gray-300 px-4 py-3 text-gray-700 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all duration-200 bg-white/50 hover:bg-white"
+                                    value={user?.email || 'Loading...'}
+                                    readOnly
+                                    className="mt-2 block w-full rounded-lg border border-gray-300 px-4 py-3 text-gray-700 bg-gray-100 cursor-not-allowed"
                                 />
                             </div>
                             <div className="group">
                                 <label className="text-sm font-medium text-gray-600 group-hover:text-gray-800 transition-colors duration-200">Bio</label>
                                 <textarea
-                                    value={user.bio}
+                                    value={user?.bio || ''}
                                     onChange={handleBioChange}
                                     rows="4"
                                     className="mt-2 block w-full rounded-lg border border-gray-300 px-4 py-3 text-gray-700 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all duration-200 bg-white/50 hover:bg-white resize-none"
