@@ -49,10 +49,18 @@ const ProfileView = () => {
 
     const updateProfilePic = async() => {
         try {
-            const { data, error } = await supabase.storage.from('profile_pics').update(`${user.id}/avatar.png`, avatarPreview, {
+            //get file type from base64 string
+            const fileType = avatarPreview.split(';')[0].split('/')[1];
+            const base64Data = avatarPreview.split(',')[1];
+            const blob = await fetch(avatarPreview).then(r => r.blob());
+            const { data, error } = await supabase.storage.from('profile_pics').update(`${user.id}/avatar${fileType}`, blob, {
                 cacheControl: '3600',
-                upsert: true
+                upsert: true,
+                contentType: `image/${fileType}`
             })
+
+            if(error) throw error;
+            return data;
         } catch (error) {
             throw error
             
@@ -61,19 +69,58 @@ const ProfileView = () => {
 
     const updateBannerPic = async() => {
         try {
-            const { data, error } = await supabase.storage.from('banner_pics').update(`${user.id}/banner.png`, bannerPreview, {
-                cacheControl: '3600',
-                upsert: true
-            })
-        } catch (error) {
-            throw error
+            // Get file type from base64 string
+            const fileType = bannerPreview.split(';')[0].split('/')[1];
+            const base64Data = bannerPreview.split(',')[1];
+            const blob = await fetch(bannerPreview).then(r => r.blob());
+            
+            const { data, error } = await supabase.storage
+                .from('banner_pics')
+                .update(`${user.id}/banner.${fileType}`, blob, {
+                    cacheControl: '3600',
+                    upsert: true,
+                    contentType: `image/${fileType}`
+                });
 
+            if (error) throw error;
+            return data;
+        } catch (error) {
+            console.error('Error updating banner picture:', error);
+            throw error;
         }
     }
 
+
+
+
+    const handleSave = async () => {
+        try {
+            // Update profile picture if changed
+            if (avatarPreview) {
+                await updateProfilePic();
+            }
+
+            // Update banner picture if changed
+            if (bannerPreview) {
+                await updateBannerPic();
+            }
+
+            // Clear previews after successful upload
+            setAvatarPreview(null);
+            setBannerPreview(null);
+
+            // Refresh user data
+            await getUserInfo();
+
+            alert('Changes saved successfully!');
+        } catch (error) {
+            console.error('Error saving changes:', error);
+            alert('Error saving changes. Please try again.');
+        }
+    };
+
     
 
-   
 
     const handleImageUpload = (event, type) => {
         const file = event.target.files[0];
@@ -305,7 +352,7 @@ const ProfileView = () => {
                     <button className="px-6 py-2.5 rounded-lg bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 hover:border-gray-400 transition-all duration-300 shadow-sm">
                         Cancel
                     </button>
-                    <button className="px-6 py-2.5 rounded-lg bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:from-blue-600 hover:to-blue-700 transition-all duration-300 shadow-md hover:shadow-lg transform hover:scale-[1.02]">
+                    <button onClick={handleSave} className="px-6 py-2.5 rounded-lg bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:from-blue-600 hover:to-blue-700 transition-all duration-300 shadow-md hover:shadow-lg transform hover:scale-[1.02]">
                         Save Changes
                     </button>
                 </div>
